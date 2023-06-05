@@ -11,6 +11,7 @@ module.exports = {
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-plusplus': 'off',
+    'vue/valid-v-show': 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'padding-line-between-statements': [
       'error',
