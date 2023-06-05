@@ -1,7 +1,6 @@
 import subprocess
 import sys
 
-
 def open_read_file(file):
     """Opens the given file, reads and returns the file as a string"""
 
