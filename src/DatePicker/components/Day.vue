@@ -10,17 +10,21 @@
       @click.prevent.stop="dayClicked($event, date)"
       :class="[
         dayClass,
+        { 'vhd__datepicker__month-day--current-period': currentPeriod },
         disabledClass,
         checkinCheckoutClass,
         bookingClass,
+        hoveringDateDisableSelectClass,
         { 'vhd__datepicker__month-day--today': isToday },
       ]"
       :tabindex="tabIndex"
       ref="day"
     >
       <div class="vhd__datepicker__month-day-wrapper">
-        <span class="day">{{ dayNumber }}</span>
-        <Price :show="showPrice" :price="dayPrice" :symbol="priceSymbol" />
+        <div class="vhd__datepicker__month-day-wrapper-inner">
+          <div :key="'day-div-' + customKey" class="day">{{ dayNumber }}</div>
+          <Price :show="showPrice" :price="dayPrice" :symbol="priceSymbol" />
+        </div>
       </div>
     </div>
     <BookingBullet
@@ -153,6 +157,7 @@ export default {
       currentDate: new Date(),
       isDisabled: false,
       isHighlighted: false,
+      customKey: Date.now(),
     }
   },
   computed: {
@@ -201,7 +206,7 @@ export default {
         }
       }
 
-      return String(result)
+      return result
     },
     halfDayClass() {
       if (Object.keys(this.checkIncheckOutHalfDay).length > 0) {
@@ -333,12 +338,20 @@ export default {
           return `${classSelected} vhd__datepicker__month-day--disabled afterMinimumDurationValidDay`
         }
 
+        const { startNights = [] } = this.checkInPeriod
+
+        if (this.checkInPeriod.startNight) {
+          startNights.push(this.checkInPeriod.startNight)
+        }
+
         if (
           Object.keys(this.checkInPeriod).length > 0 &&
-          this.checkInPeriod.periodType.includes('weekly') &&
           this.hoveringDate &&
-          ((this.checkInPeriod.periodType === 'weekly_by_saturday' && this.hoveringDate.getDay() === 6) ||
-            (this.checkInPeriod.periodType === 'weekly_by_sunday' && this.hoveringDate.getDay() === 0)) &&
+          ((this.checkInPeriod.periodType.includes('weekly') &&
+            ((this.checkInPeriod.periodType === 'weekly_by_saturday' && this.hoveringDate.getDay() === 6) ||
+              (this.checkInPeriod.periodType === 'weekly_by_sunday' && this.hoveringDate.getDay() === 0) ||
+              (this.checkInPeriod.periodType === 'weekly_by_friday' && this.hoveringDate.getDay() === 5))) ||
+            startNights.includes(this.hoveringDate.getDay())) &&
           this.isDateLessOrEquals(this.date, this.hoveringDate)
         ) {
           // If currentPeriod has a minimumDuration 1
@@ -356,6 +369,7 @@ export default {
           this.hoveringDate &&
           this.hoveringPeriod.periodType.includes('weekly') &&
           ((this.hoveringPeriod.periodType === 'weekly_by_saturday' && this.hoveringDate.getDay() === 6) ||
+            (this.hoveringPeriod.periodType === 'weekly_by_friday' && this.hoveringDate.getDay() === 5) ||
             (this.hoveringPeriod.periodType === 'weekly_by_sunday' &&
               this.hoveringDate.getDay() === 0 &&
               this.isDateLessOrEquals(this.date, this.hoveringDate)))
@@ -386,17 +400,71 @@ export default {
       // Good
       return 'vhd__datepicker__month-day--valid'
     },
-    checkinCheckoutClass() {
+    hoveringDateDisableSelectClass() {
+      if (this.currentPeriod) {
+        const { endNights = [], ...currentPeriod } = this.currentPeriod
+        /**
+         * We need to check for the following:
+         *
+         * - hovering period
+         *    - End Night check - once checked in - is end night included in end night array
+         *    - Advanced Check based on Start Night - uses advancedStartNight functional handler
+         * - current date
+         *    - End Night check - once checked in - is end night included in end night array
+         *    - Advanced Check based on Start Night - uses advancedStartNight functional handler
+         */
+
+        if (
+          currentPeriod.periodType === 'nightly' &&
+          this.checkIn &&
+          this.hoveringDate &&
+          ((endNights.length && !endNights.includes(this.hoveringDate.getDay())) ||
+            (currentPeriod.advancedStartNight &&
+              this.checkIn.getDay() in currentPeriod.advancedStartNight &&
+              !currentPeriod.advancedStartNight[this.checkIn.getDay()](
+                this.countDays(this.checkIn, this.hoveringDate),
+              )))
+        ) {
+          return 'vhd__datepicker__month-day--hover-invalid'
+        }
+      }
+
+      return ''
+    },
+    currentPeriod() {
       let currentPeriod = null
 
       this.sortedPeriodDates.forEach((d) => {
         if (
-          d.endAt !== this.formatDate &&
-          (d.startAt === this.formatDate || this.validateDateBetweenTwoDates(d.startAt, d.endAt, this.formatDate))
+          d.endAt === this.formatDate ||
+          d.startAt === this.formatDate ||
+          this.validateDateBetweenTwoDates(d.startAt, d.endAt, this.formatDate)
         ) {
           currentPeriod = d
         }
       })
+
+      if (currentPeriod) {
+        const { startNights = [], endNights = [] } = currentPeriod
+
+        if (currentPeriod.startNight && !startNights.includes(currentPeriod.startNight)) {
+          startNights.push(currentPeriod.startNight)
+        }
+
+        if (currentPeriod.endNight && !endNights.includes(currentPeriod.endNight)) {
+          endNights.push(currentPeriod.endNight)
+        }
+
+        return { ...currentPeriod, startNights, endNights }
+      }
+
+      return null
+    },
+    checkinCheckoutClass() {
+      // add class for Check-in day
+      if (this.checkIn === this.date) {
+        return 'vhd__datepicker__month-day vhd__datepicker__month-day--valid vhd__datepicker__month-day--check-in'
+      }
 
       if (
         this.nextPeriodDisableDates
@@ -406,16 +474,66 @@ export default {
         return 'vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed nightly'
       }
 
-      if (currentPeriod) {
+      // Day is within PeriodDates
+      if (this.currentPeriod) {
+        const { startNights = [], endNights = [], ...currentPeriod } = this.currentPeriod
+
+        // Start Night check - before first checkIn - is current day included in start night array
+        if (
+          currentPeriod.periodType === 'nightly' &&
+          startNights.length &&
+          !this.checkIn &&
+          !startNights.includes(this.date.getDay())
+        ) {
+          return 'vhd__datepicker__month-day--period vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed not_nightly_start_night'
+        }
+
+        // Booking Period Too short
+        if (
+          currentPeriod.periodType === 'nightly' &&
+          startNights.length &&
+          this.checkIn &&
+          this.getDayDiff(this.checkIn, this.date) < currentPeriod.minimumDuration
+        ) {
+          return 'vhd__datepicker__month-day--period vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed minimumDurationUnvalidDay'
+        }
+
+        // End Night check - once checked in - is end night included in end night array
+        if (
+          currentPeriod.periodType === 'nightly' &&
+          endNights.length &&
+          this.checkIn &&
+          !endNights.includes(this.date.getDay())
+        ) {
+          return `vhd__datepicker__month-day--period vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed not_nightly_end_night ${this.hoveringDateCheckedInCheck}`
+        }
+
+        // Disable date between checkIn and nextDate, if minimumDuration is superior to 1
+        if (this.notAllowDaysBetweenCheckInAndNextValidDate(startNights)) {
+          return 'vhd__datepicker__month-day--period vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed not_nightly_start_night not_nightly_start_night_2'
+        }
+
+        // Advanced Check based on Start Night - uses advancedStartNight functional handler
+        if (
+          currentPeriod.periodType === 'nightly' &&
+          this.checkIn &&
+          startNights.length &&
+          currentPeriod.advancedStartNight &&
+          this.checkIn.getDay() in currentPeriod.advancedStartNight &&
+          !currentPeriod.advancedStartNight[this.checkIn.getDay()](this.countDays(this.checkIn, this.date))
+        ) {
+          return `vhd__datepicker__month-day--period vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed nightly not_nightly_end_night not_nightly_end_night--advanced ${this.hoveringDateCheckedInCheck}`
+        }
+
         if (currentPeriod.periodType === 'nightly' && this.belongsToThisMonth && !this.isDisabled) {
           if (
             ((!this.checkIn && !this.checkOut) || (this.checkIn && this.checkOut)) &&
             this.notAllowedDayDueToNextPeriod(currentPeriod)
           ) {
-            return 'vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed nightly'
+            return 'vhd__datepicker__month-day--period vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed nightly'
           }
 
-          return 'nightly'
+          return `vhd__datepicker__month-day--period nightly vhd__datepicker__month-day__period--allowed`
         }
 
         // date.getDay() === 6 => saturday
@@ -425,12 +543,27 @@ export default {
           currentPeriod.endAt !== this.formatDate &&
           this.date.getDay() !== 6
         ) {
-          return 'vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed weekly_by_saturday'
+          return 'vhd__datepicker__month-day--period vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed weekly_by_saturday'
         }
 
         // Disable date between checkIn and nextDate, if minimumDuration is superior to 1
-        if (this.notAllowDaysBetweenCheckInAndNextValidDate(6)) {
-          return 'vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed weekly_by_saturday'
+        if (this.notAllowDaysBetweenCheckInAndNextValidDate([6])) {
+          return 'vhd__datepicker__month-day--period vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed weekly_by_saturday'
+        }
+
+        // date.getDay() === 5 => friday
+        if (
+          (currentPeriod.periodType === 'weekly_by_friday' || currentPeriod.periodType === 'nightly_by_friday') &&
+          currentPeriod.startAt !== this.formatDate &&
+          currentPeriod.endAt !== this.formatDate &&
+          this.date.getDay() !== 5
+        ) {
+          return 'vhd__datepicker__month-day--period vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed weekly_by_friday'
+        }
+
+        // Disable date between checkIn and nextDate, if minimumDuration is superior to 1
+        if (this.notAllowDaysBetweenCheckInAndNextValidDate([5])) {
+          return 'vhd__datepicker__month-day--period vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed weekly_by_friday'
         }
 
         // date.getDay() === 0 => sunday
@@ -440,15 +573,21 @@ export default {
           currentPeriod.endAt !== this.formatDate &&
           this.date.getDay() !== 0
         ) {
-          return 'vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed weekly_by_sunday'
+          return 'vhd__datepicker__month-day--period vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed weekly_by_sunday'
         }
 
         // Disable date between checkIn and nextDate, if minimumDuration is superior to 1
-        if (this.notAllowDaysBetweenCheckInAndNextValidDate(0)) {
-          return 'vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed weekly_by_sunday'
+        if (this.notAllowDaysBetweenCheckInAndNextValidDate([0])) {
+          return 'vhd__datepicker__month-day--period vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed weekly_by_sunday'
         }
 
-        return ''
+        // Disable date between checkIn and nextDate, if minimumDuration is superior to 1
+        if (this.notAllowDaysBetweenCheckInAndNextValidDate(startNights)) {
+          return 'vhd__datepicker__month-day--period vhd__datepicker__month-day--disabled vhd__datepicker__month-day--not-allowed not_nightly_start_night'
+        }
+
+        return 'vhd__datepicker__month-day--period'
+        // end of nightly
       }
 
       return ''
@@ -489,7 +628,16 @@ export default {
         checkInIsInPeriod &&
         this.nightsCount >= 7
       ) {
-        return `${this.nightsCount / 7} ${this.pluralize(this.nightsCount, 'week')}`
+        // Only show number of weeks if integer, otherwise nights
+        const isWeek = this.nightsCount % 7 === 0
+        const periodType = isWeek ? 'week' : 'night'
+        let nightOrWeekCount = this.nightsCount
+
+        if (isWeek) {
+          nightOrWeekCount = this.nightsCount / 7
+        }
+
+        return `${nightOrWeekCount} ${this.pluralize(this.nightsCount, periodType)}`
       }
 
       if (this.nightsCount >= 1) {
@@ -519,7 +667,7 @@ export default {
     },
     isADisabledDay() {
       const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
-      const day = days[this.date.getUTCDay()]
+      const day = days[this.date.getDay()]
 
       return this.options.disabledWeekDaysObject[day]
     },
@@ -555,11 +703,11 @@ export default {
   },
   methods: {
     ...Helpers,
-    notAllowDaysBetweenCheckInAndNextValidDate(dayCode) {
+    notAllowDaysBetweenCheckInAndNextValidDate(dayCodes = []) {
       return (
         this.checkIn &&
         !this.checkOut &&
-        this.date.getDay() === dayCode &&
+        dayCodes.includes(this.date.getDay()) &&
         Object.keys(this.hoveringPeriod).length > 0 &&
         this.validateDateBetweenTwoDates(this.checkIn, this.hoveringPeriod.nextValidDate, this.date) &&
         this.dateFormater(this.checkIn) !== this.formatDate &&
@@ -624,7 +772,9 @@ export default {
         }
       }
 
-      if (disableCheckoutOnCheckin) {
+      if (date === this.checkIn) {
+        this.$emit('clear-selection')
+      } else if (disableCheckoutOnCheckin) {
         if (!this.isDisabled || this.isClickable()) {
           const formatDate = this.dateFormater(date)
 

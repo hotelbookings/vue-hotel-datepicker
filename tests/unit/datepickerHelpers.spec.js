@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { expect } from 'chai'
 import DatepickerHelpers from '../../src/helpers'
 

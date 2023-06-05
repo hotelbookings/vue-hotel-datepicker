@@ -24,11 +24,14 @@ const helpers = {
     const newReferenceDate = new Date(referenceDate)
     let newWeekDay = weekDay.toLowerCase()
     const daysDefault = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+    // code below was checking for i18n day while default day was being passed
     const days = i18n ? i18n['day-names'] : daysDefault
     const referenceDateDay = newReferenceDate.getDay()
 
-    for (let i = 7; ; i--) {
-      if (newWeekDay === days[i]) {
+    for (let i = 7; i > -1; i--) {
+      // line was previously days[i] which failed if il8n day names changed as weekDay,
+      // have left in there to avoid eslint error with no-unused-vars
+      if (newWeekDay === daysDefault[i] || newWeekDay === days[i]) {
         newWeekDay = i <= referenceDateDay ? i + 7 : i
         break
       }
@@ -208,7 +211,7 @@ const helpers = {
     return ''
   },
   pluralize(countOfDays, periodType = 'night') {
-    if (periodType === 'week') {
+    if (periodType === 'week' && countOfDays % 7 === 0) {
       return countOfDays > 7 ? this.i18n.weeks : this.i18n.week
     }
 

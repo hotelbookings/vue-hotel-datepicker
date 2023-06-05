@@ -2,7 +2,8 @@
 
 [Description of the bug or feature]
 
-### Code sample 
+### Code sample
+
 [ If you are submitting a bug issue, paste your code so I can reproduce it, or a link to a Codepen with it ]
 
 ### Steps to Reproduce

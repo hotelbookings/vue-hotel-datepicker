@@ -18,8 +18,8 @@ $vhd__font-smaller: 12px !default;
   * RESPONSIVE LAYOUT HELPERS
   * ============================================================*/
 
-$vhd__tablet: "(min-width: 480px) and (max-width: 767px)" !default;
-$vhd__phone: "(max-width: 479px)" !default;
-$vhd__desktop: "(min-width: 768px)" !default;
-$vhd__up-to-tablet: "(max-width: 767px)" !default;
-$extra-small-screen: "(max-width: 23em)" !default;
+$vhd__tablet: '(min-width: 480px) and (max-width: 767px)' !default;
+$vhd__phone: '(max-width: 479px)' !default;
+$vhd__desktop: '(min-width: 768px)' !default;
+$vhd__up-to-tablet: '(max-width: 767px)' !default;
+$extra-small-screen: '(max-width: 23em)' !default;

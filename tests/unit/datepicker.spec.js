@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { expect } from 'chai'
 import { mount } from '@vue/test-utils'
 

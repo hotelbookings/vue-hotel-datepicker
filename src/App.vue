@@ -88,6 +88,7 @@
             :firstDayOfWeek="firstDayOfWeek"
             :alwaysVisible="alwaysVisible"
             :gridStyle="gridStyle"
+            :customPeriod="customPeriod"
             :showSingleMonth="showSingleMonth"
             :showYear="showYear"
             :showPrice="showPrice"
@@ -103,6 +104,8 @@
             :i18n="i18n"
             @day-clicked="dayClicked"
           >
+            <template slot="monthHeaderSlot">Header</template>
+            <template slot="monthFooterSlot">Footer</template>
             <!-- Insert content here -->
             <div
               slot="content"
@@ -300,11 +303,37 @@ export default {
           periodType: 'nightly',
         },
         {
-          startAt: '2021-10-04',
-          endAt: '2021-11-29',
+          startAt: '2022-03-01',
+          endAt: '2022-03-31',
           minimumDuration: 1,
-          periodType: 'weekly_by_sunday',
-          price: 4000.0,
+          periodType: 'weekly_by_friday',
+        },
+        {
+          startAt: '2022-04-01',
+          endAt: '2022-04-30',
+          minimumDuration: 4,
+          periodType: 'nightly',
+          startNights: [1],
+          endNights: [5],
+        },
+        {
+          startAt: '2022-05-01',
+          endAt: '2022-05-31',
+          minimumDuration: 3,
+          periodType: 'nightly',
+          startNights: [5],
+        },
+        {
+          startAt: '2022-06-01',
+          endAt: '2022-06-30',
+          minimumDuration: 3,
+          periodType: 'nightly',
+          customTooltip: 'sevenOrMore',
+          startNights: [1, 5],
+          endNights: [1, 5],
+          advancedStartNight: {
+            1: (duration) => duration === 4 || duration % 7 === 0,
+          },
         },
         ...periodDatesPrices,
       ],
@@ -384,6 +413,7 @@ export default {
       ],
       checkIn: null,
       checkOut: null,
+      customPeriod: [2, 3, 4, 5],
       minNights: 3,
       menu: false,
       currentWidth: window.innerWidth,

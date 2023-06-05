@@ -5,14 +5,30 @@
       'vhd__datepicker__wrapper--grid': gridStyle,
       'vhd__datepicker__wrapper--booking': bookings.length > 0,
       vhd__datepicker__fullview: alwaysVisible,
+      'vhd__datepicker__wrapper--inCustomPeriod': isInCustomPeriod,
     }"
     :ref="`DatePicker-${hash}`"
     v-if="value"
   >
-    <div class="vhd__datepicker__close-button vhd__hide-on-desktop" v-if="isOpen" @click="closeMobileDatepicker">
-      <i>+</i>
-    </div>
     <div class="vhd__datepicker__dummy-wrapper" :class="{ 'vhd__datepicker__dummy-wrapper--is-active': isOpen }">
+      <div class="vhd__datepicker__input__svg">
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          data-prefix="fal"
+          data-icon="calendar-alt"
+          role="img"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 448 512"
+          class="svg-inline--fa fa-calendar-alt fa-w-14"
+        >
+          <path
+            d="M400 64h-48V12c0-6.6-5.4-12-12-12h-8c-6.6 0-12 5.4-12 12v52H128V12c0-6.6-5.4-12-12-12h-8c-6.6 0-12 5.4-12 12v52H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM48 96h352c8.8 0 16 7.2 16 16v48H32v-48c0-8.8 7.2-16 16-16zm352 384H48c-8.8 0-16-7.2-16-16V192h384v272c0 8.8-7.2 16-16 16zM148 320h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm96 0h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm96 0h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm-96 96h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm-96 0h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm192 0h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12z"
+            class=""
+            fill="var(--primary_color)"
+          ></path>
+        </svg>
+      </div>
       <date-input
         :i18n="i18n"
         :input-date="formatDate(checkIn)"
@@ -21,7 +37,26 @@
         :toggle-datepicker="toggleDatepicker"
         :single-day-selection="singleDaySelection"
       />
-
+      <div class="vhd__datepicker__input__svg vhd__datepicker__input__svg--separator">
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          data-prefix="fal"
+          data-icon="chevron-right"
+          role="img"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 256 512"
+          class="svg-inline--fa fa-chevron-right fa-w-8"
+          style=""
+        >
+          <path
+            fill="currentColor"
+            d="M17.525 36.465l-7.071 7.07c-4.686 4.686-4.686 12.284 0 16.971L205.947 256 10.454 451.494c-4.686 4.686-4.686 12.284 0 16.971l7.071 7.07c4.686 4.686 12.284 4.686 16.97 0l211.051-211.05c4.686-4.686 4.686-12.284 0-16.971L34.495 36.465c-4.686-4.687-12.284-4.687-16.97 0z"
+            class=""
+            style=""
+          ></path>
+        </svg>
+      </div>
       <date-input
         v-if="!singleDaySelection"
         :i18n="i18n"
@@ -31,12 +66,31 @@
         :toggle-datepicker="toggleDatepicker"
         :single-day-selection="singleDaySelection"
       />
-    </div>
-    <div class="vhd__datepicker__clear-button" tabindex="0" @click="clearSelection" v-show="showClearSelectionButton">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 68 68" role="img" aria-label="x">
-        <title>x</title>
-        <path d="M6.5 6.5l55 55m0-55l-55 55" stroke="#000" fill="none" stroke-linecap="square" />
-      </svg>
+      <div class="vhd__datepicker__input__svg vhd__datepicker__input__svg--clear-button">
+        <div
+          class="vhd__datepicker__clear-button"
+          tabindex="0"
+          @click="clearSelection"
+          v-show="showClearSelectionButton"
+        >
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            data-prefix="fal"
+            data-icon="times"
+            role="img"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 320 512"
+            class="svg-inline--fa fa-times fa-w-10"
+          >
+            <path
+              fill="currentColor"
+              d="M193.94 256L296.5 153.44l21.15-21.15c3.12-3.12 3.12-8.19 0-11.31l-22.63-22.63c-3.12-3.12-8.19-3.12-11.31 0L160 222.06 36.29 98.34c-3.12-3.12-8.19-3.12-11.31 0L2.34 120.97c-3.12 3.12-3.12 8.19 0 11.31L126.06 256 2.34 379.71c-3.12 3.12-3.12 8.19 0 11.31l22.63 22.63c3.12 3.12 8.19 3.12 11.31 0L160 289.94 262.56 392.5l21.15 21.15c3.12 3.12 8.19 3.12 11.31 0l22.63-22.63c3.12-3.12 3.12-8.19 0-11.31L193.94 256z"
+              class=""
+            ></path>
+          </svg>
+        </div>
+      </div>
     </div>
     <div
       class="vhd__datepicker"
@@ -53,6 +107,24 @@
           :class="{ 'vhd__datepicker__dummy-wrapper--is-active': isOpen }"
           @click="toggleDatepicker"
         >
+          <div class="vhd__datepicker__input__svg">
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              data-prefix="fal"
+              data-icon="calendar-alt"
+              role="img"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 448 512"
+              class="svg-inline--fa fa-calendar-alt fa-w-14"
+            >
+              <path
+                d="M400 64h-48V12c0-6.6-5.4-12-12-12h-8c-6.6 0-12 5.4-12 12v52H128V12c0-6.6-5.4-12-12-12h-8c-6.6 0-12 5.4-12 12v52H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM48 96h352c8.8 0 16 7.2 16 16v48H32v-48c0-8.8 7.2-16 16-16zm352 384H48c-8.8 0-16-7.2-16-16V192h384v272c0 8.8-7.2 16-16 16zM148 320h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm96 0h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm96 0h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm-96 96h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm-96 0h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12zm192 0h-40c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12z"
+                class=""
+                fill="var(--primary_color)"
+              ></path>
+            </svg>
+          </div>
           <div
             class="vhd__datepicker__input"
             tabindex="0"
@@ -62,6 +134,26 @@
             type="button"
           >
             {{ `${checkIn ? formatDate(checkIn) : i18n['check-in']}` }}
+          </div>
+          <div class="vhd__datepicker__input__svg vhd__datepicker__input__svg--separator">
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              data-prefix="fal"
+              data-icon="chevron-right"
+              role="img"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 256 512"
+              class="svg-inline--fa fa-chevron-right fa-w-8"
+              style=""
+            >
+              <path
+                fill="currentColor"
+                d="M17.525 36.465l-7.071 7.07c-4.686 4.686-4.686 12.284 0 16.971L205.947 256 10.454 451.494c-4.686 4.686-4.686 12.284 0 16.971l7.071 7.07c4.686 4.686 12.284 4.686 16.97 0l211.051-211.05c4.686-4.686 4.686-12.284 0-16.971L34.495 36.465c-4.686-4.687-12.284-4.687-16.97 0z"
+                class=""
+                style=""
+              ></path>
+            </svg>
           </div>
           <div
             class="vhd__datepicker__input"
@@ -73,9 +165,40 @@
           >
             {{ `${checkOut ? formatDate(checkOut) : i18n['check-out']}` }}
           </div>
+          <div class="vhd__datepicker__close-button vhd__hide-on-desktop" v-if="isOpen" @click="closeMobileDatepicker">
+            <div
+              class="vhd__datepicker__clear-button"
+              tabindex="0"
+              @click="clearSelection"
+              v-show="showClearSelectionButton"
+            >
+              <svg
+                aria-hidden="true"
+                focusable="false"
+                data-prefix="fal"
+                data-icon="times"
+                role="img"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 320 512"
+                class="svg-inline--fa fa-times fa-w-10"
+              >
+                <path
+                  fill="currentColor"
+                  d="M193.94 256L296.5 153.44l21.15-21.15c3.12-3.12 3.12-8.19 0-11.31l-22.63-22.63c-3.12-3.12-8.19-3.12-11.31 0L160 222.06 36.29 98.34c-3.12-3.12-8.19-3.12-11.31 0L2.34 120.97c-3.12 3.12-3.12 8.19 0 11.31L126.06 256 2.34 379.71c-3.12 3.12-3.12 8.19 0 11.31l22.63 22.63c3.12 3.12 8.19 3.12 11.31 0L160 289.94 262.56 392.5l21.15 21.15c3.12 3.12 8.19 3.12 11.31 0l22.63-22.63c3.12-3.12 3.12-8.19 0-11.31L193.94 256z"
+                  class=""
+                ></path>
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
       <div v-if="isOpen || alwaysVisible" class="vhd__datepicker__inner">
+        <template v-show="isInCustomPeriod">
+          <slot name="monthHeaderSlot" />
+        </template>
+        <template v-if="!isDesktop" v-show="isInCustomPeriod">
+          <slot name="monthFooterSlot" />
+        </template>
         <div
           :class="{
             vhd__datepicker__header: isDesktop,
@@ -89,7 +212,24 @@
             @keyup.enter.stop.prevent="renderPreviousMonth"
             :tabindex="isOpen ? 0 : -1"
             :disabled="activeMonthIndex === 0"
-          />
+          >
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              data-prefix="fal"
+              data-icon="chevron-left"
+              role="img"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 256 512"
+              class="svg-inline--fa fa-chevron-left fa-w-8"
+            >
+              <path
+                d="M238.475 475.535l7.071-7.07c4.686-4.686 4.686-12.284 0-16.971L50.053 256 245.546 60.506c4.686-4.686 4.686-12.284 0-16.971l-7.071-7.07c-4.686-4.686-12.284-4.686-16.97 0L10.454 247.515c-4.686 4.686-4.686 12.284 0 16.971l211.051 211.05c4.686 4.686 12.284 4.686 16.97-.001z"
+                class=""
+                fill="var(--primary_color)"
+              ></path>
+            </svg>
+          </button>
           <button
             type="button"
             class="vhd__datepicker__month-button vhd__datepicker__month-button--next"
@@ -97,7 +237,24 @@
             @keyup.enter.stop.prevent="renderNextMonth"
             :disabled="isPreventedMaxMonth"
             :tabindex="isOpen ? 0 : -1"
-          />
+          >
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              data-prefix="fal"
+              data-icon="chevron-right"
+              role="img"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 256 512"
+              class="svg-inline--fa fa-chevron-right fa-w-8"
+            >
+              <path
+                d="M17.525 36.465l-7.071 7.07c-4.686 4.686-4.686 12.284 0 16.971L205.947 256 10.454 451.494c-4.686 4.686-4.686 12.284 0 16.971l7.071 7.07c4.686 4.686 12.284 4.686 16.97 0l211.051-211.05c4.686-4.686 4.686-12.284 0-16.971L34.495 36.465c-4.686-4.687-12.284-4.687-16.97 0z"
+                class=""
+                fill="var(--primary_color)"
+              ></path>
+            </svg>
+          </button>
         </div>
         <div
           v-if="isDesktop || alwaysVisible"
@@ -121,6 +278,7 @@
             :checkIncheckOutHalfDay="checkIncheckOutHalfDay"
             :checkInPeriod="checkInPeriod"
             :checkOut="checkOut"
+            :customPeriod="customPeriod"
             :disableCheckoutOnCheckin="disableCheckoutOnCheckin"
             :duplicateBookingDates="duplicateBookingDates"
             :hoveringDate="hoveringDate"
@@ -175,6 +333,7 @@
               :checkIncheckOutHalfDay="checkIncheckOutHalfDay"
               :checkInPeriod="checkInPeriod"
               :checkOut="checkOut"
+              :customPeriod="customPeriod"
               :disableCheckoutOnCheckin="disableCheckoutOnCheckin"
               :duplicateBookingDates="duplicateBookingDates"
               :hoveringDate="hoveringDate"
@@ -200,6 +359,11 @@
             />
           </div>
         </div>
+        <template v-if="isDesktop">
+          <template v-show="isInCustomPeriod">
+            <slot name="monthFooterSlot" />
+          </template>
+        </template>
       </div>
       <slot name="content" />
     </div>
@@ -235,6 +399,10 @@ export default {
     closeDatepickerOnClickOutside: {
       type: Boolean,
       default: true,
+    },
+    customPeriod: {
+      type: Array,
+      default: () => [],
     },
     disableCheckoutOnCheckin: {
       type: Boolean,
@@ -339,6 +507,10 @@ export default {
     showWeekNumbers: {
       type: Boolean,
       default: false,
+    },
+    showTooltipOnOneDay: {
+      type: Boolean,
+      default: true,
     },
     singleDaySelection: {
       type: Boolean,
@@ -518,6 +690,17 @@ export default {
       const lastIndexMonthAvailable = this.getMonthDiff(this.startDate, this.lastDateAvailable)
 
       return this.activeMonthIndex >= lastIndexMonthAvailable - 1
+    },
+    isInCustomPeriod() {
+      if (this.customPeriod.length) {
+        return this.paginateMonths.some((month) =>
+          this.customPeriod.some((p) => {
+            return p === month.days[15].date.getMonth()
+          }),
+        )
+      }
+
+      return false
     },
     minNightCount() {
       return this.dynamicNightCounts || this.minNights
@@ -846,17 +1029,65 @@ export default {
       this.setCurrentPeriod(date, 'hover')
 
       if (Object.keys(this.hoveringPeriod).length > 0) {
+        const { startNights = [], endNights = [] } = this.hoveringPeriod
+
+        if (this.hoveringPeriod.startNight && !startNights.includes(this.hoveringPeriod.startNight)) {
+          startNights.push(this.hoveringPeriod.startNight)
+        }
+
+        if (this.hoveringPeriod.endNight && !endNights.includes(this.hoveringPeriod.endNight)) {
+          endNights.push(this.hoveringPeriod.endNight)
+        }
+
         // Create tooltip
         if (this.hoveringPeriod.periodType === 'weekly_by_saturday') {
-          const dayCode = 6
+          const dayCodes = [6]
           const text = this.i18n.tooltip.saturdayToSaturday
 
-          this.showTooltipWeeklyOnHover(date, dayCode, text)
+          this.showTooltipWeeklyOnHover(date, dayCodes, text)
+        } else if (this.hoveringPeriod.periodType === 'mon_fri_booking_only') {
+          let dayCodes = [5]
+          const text = this.i18n.tooltip.monToFridayOnly
+
+          this.showTooltipWeeklyOnHover(date, dayCodes, text)
+
+          dayCodes = [1]
+          this.showTooltipWeeklyOnHover(date, dayCodes, text)
+        } else if (this.hoveringPeriod.periodType === 'weekly_by_friday') {
+          const dayCodes = [5]
+          const text = this.i18n.tooltip.fridayToFriday
+
+          this.showTooltipWeeklyOnHover(date, dayCodes, text)
+        } else if (this.hoveringPeriod.periodType === 'nightly_by_friday') {
+          const dayCodes = [5]
+          const text = this.i18n.tooltip.fridayToMonday
+
+          this.showTooltipWeeklyOnHover(date, dayCodes, text)
+        } else if (this.hoveringPeriod.periodType === 'nightly_by_monday') {
+          const dayCodes = [1]
+          const text = this.i18n.tooltip.monToFridayOnly
+
+          this.showTooltipWeeklyOnHover(date, dayCodes, text)
         } else if (this.hoveringPeriod.periodType === 'weekly_by_sunday') {
-          const dayCode = 0
+          const dayCodes = [0]
           const text = this.i18n.tooltip.sundayToSunday
 
-          this.showTooltipWeeklyOnHover(date, dayCode, text)
+          this.showTooltipWeeklyOnHover(date, dayCodes, text)
+        } else if (this.hoveringPeriod.periodType === 'nightly' && startNights.length) {
+          const dayCodes = startNights
+          const { customTooltip } = this.hoveringPeriod
+          let text = ''
+
+          if (customTooltip) {
+            text = this.i18n.tooltip[customTooltip]
+          } else if (dayCodes.length === 1 && dayCodes[0] === 1) {
+            text = this.i18n.tooltip.monToFridayOnly
+          } else if (dayCodes.length === 1 && dayCodes[0] === 5) {
+            text = this.i18n.tooltip.fridayToMonday
+          }
+
+          // startNight / endNight type activate tooltip
+          this.showTooltipWeeklyOnHover(date, dayCodes, text, endNights)
         } else if (this.hoveringPeriod.periodType === 'nightly') {
           this.showTooltipNightlyOnHover(date)
         } else {
@@ -963,9 +1194,15 @@ export default {
         this.showTooltipNightlyOnClick()
       }
     },
-    showTooltipWeeklyOnHover(date, periodDayType, text) {
+    showTooltipWeeklyOnHover(date, periodDayType, text, endNights = []) {
       const countDaysBetweenCheckInCurrentDay = this.countDays(this.checkIn, date)
-      const notOnPeriodDayType = date.getDay() !== periodDayType
+      let notOnPeriodDayType = !periodDayType.includes(date.getDay())
+
+      // this code updates the tooltip on startNight / endNight type nightly options
+      if (endNights.length && this.checkIn) {
+        notOnPeriodDayType = !endNights.includes(date.getDay())
+      }
+
       const isCheckInCheckOut = this.checkIn && this.checkOut
       const notCheckInNotPeriodDayType = !this.checkIn && notOnPeriodDayType
       const isCheckInNotCheckOut = this.checkIn && !this.checkOut
@@ -1050,7 +1287,7 @@ export default {
         const countOfDays = this.countDays(this.checkIn, date)
         const night = this.pluralize(Math.max(this.minNightCount, countOfDays))
 
-        if (!isDateAfterMinimumDuration) {
+        if (!isDateAfterMinimumDuration && (this.showTooltipOnOneDay || countOfDays > 1)) {
           const minNightInPeriod = this.hoveringPeriod.minimumDuration
 
           this.showCustomTooltip = true
@@ -1216,10 +1453,19 @@ export default {
             this.dynamicNightCounts = currentPeriod.minimumDuration
           }
 
-          if (currentPeriod.periodType === 'weekly_by_saturday' || currentPeriod.periodType === 'weekly_by_sunday') {
+          if (
+            currentPeriod.periodType === 'weekly_by_saturday' ||
+            currentPeriod.periodType === 'weekly_by_sunday' ||
+            currentPeriod.periodType === 'weekly_by_friday'
+          ) {
             const minimumDuration = currentPeriod.minimumDuration * 7
 
             this.dynamicNightCounts = minimumDuration
+          }
+
+          if (currentPeriod.periodType === 'mon_fri_booking_only') {
+            // const minimumDuration = currentPeriod.minimumDuration * 7
+            this.dynamicNightCounts = currentPeriod.minimumDuration
           }
         } else {
           this.dynamicNightCounts = 0
@@ -1235,6 +1481,8 @@ export default {
 
         this.activeMonthIndex--
 
+        this.datepickerDayKey++
+        this.datepickerMonthKey++
         this.$emit('previous-month-rendered', previousMonth)
       }
     },
@@ -1269,6 +1517,8 @@ export default {
       this.createMonth(nextMonth)
       this.activeMonthIndex++
       this.$emit('next-month-rendered', nextMonth)
+      this.datepickerDayKey++
+      this.datepickerMonthKey++
     }, 350),
     setCheckIn(date) {
       this.checkIn = date

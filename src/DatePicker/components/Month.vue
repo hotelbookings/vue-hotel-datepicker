@@ -1,10 +1,5 @@
 <template>
-  <div
-    ref="datepickerMonth"
-    class="vhd__datepicker__month"
-    :class="{ 'vhd__datepicker__month--with-week-numbers': showWeekNumbers }"
-    @mouseenter="enterMonth($event)"
-  >
+  <div ref="datepickerMonth" class="vhd__datepicker__month" :class="monthClass" @mouseenter="enterMonth($event)">
     <p class="vhd__datepicker__month-name">
       {{ monthName }}
     </p>
@@ -26,6 +21,7 @@
     >
       <Day
         v-bind="$props"
+        :key="`day-${dayKey}-${dayIndex}`"
         :belongsToThisMonth="day.belongsToThisMonth"
         :date="day.date"
         @clear-selection="clearSelection"
@@ -179,6 +175,10 @@ export default {
       default: null,
       type: String,
     },
+    customPeriod: {
+      type: Array,
+      default: () => [],
+    },
   },
   computed: {
     monthName() {
@@ -190,6 +190,15 @@ export default {
           return index % 7 === 0 && (day.belongsToThisMonth || this.month.days[index + 6].belongsToThisMonth)
         })
         .map((day) => this.getIsoWeek(day.date))
+    },
+    monthClass() {
+      const middle = this.month.days[15].date
+      const monthWithWkNmbers = this.showWeekNumbers ? ' vhd__datepicker__month--with-week-numbers' : ''
+
+      return `vhd__datepicker__month--${middle.getFullYear()}${String(middle.getMonth() + 1).padStart(
+        2,
+        '0',
+      )}${monthWithWkNmbers}`
     },
   },
   methods: {
